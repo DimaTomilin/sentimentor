@@ -1,25 +1,31 @@
-const loader=document.getElementById("loading")
+//Getting all needed elements from HTML code
+const loaderElement = document.getElementById("loading")
+const resultElement = document.getElementById("result");
 
+//Function of displaying loading element in the page
 function displayLoading(){
-    loader.classList.add("display")
+    loaderElement.classList.add("display")
 }
 
 function hideLoading(){
-    loader.classList.remove("display")
+    loaderElement.classList.remove("display")
 }
 
+//Function that add cat animation to result with given status
 function addCatAnimation(status){
-    const catAnimation=document.createElement("img")
+    const catAnimation = document.createElement("img")
     catAnimation.setAttribute("src", `https://http.cat/${status}`)
-    document.getElementById("result").appendChild(catAnimation);
+    resultElement.appendChild(catAnimation);
 }
-document.getElementById("check-button").addEventListener("click", checkText)
 
+//Main function that send request and work with it
 async function checkText(){
-    const resultElement=document.getElementById("result");
-    resultElement.innerText = "";
-    displayLoading();
-    const response= await fetch("https://sentim-api.herokuapp.com/api/v1/", {
+    resultElement.innerText = ""; //deleting all text or elements from result
+    resultElement.classList = ""; //delete all classes of result
+    
+    displayLoading(); //start to display loading element
+
+    const response = await fetch("https://sentim-api.herokuapp.com/api/v1/", { //send request to API
         method: "POST" ,
         headers: {
             'Accept': "application/json" ,
@@ -27,29 +33,23 @@ async function checkText(){
         },
         body: JSON.stringify({'text': document.querySelector("input").value})
     })
-    if(!response.ok){
+
+    if(!response.ok){ // error part: behavior of all elements in error situation anf throw ERROR with current status
         hideLoading();
-        document.getElementById("result").innerText="ERROR "+response.status+". "+response.statusText
+        resultElement.innerText="ERROR "+response.status+". "+response.statusText //displaying in result element at error message
         addCatAnimation(response.status)
         throw `ERROR ${response.status}`
     }
-    let result= await response.json()
 
-    const polarityOfResult=JSON.stringify(result.result.polarity);
-    const typeOfResult =JSON.stringify(result.result.type)
-    
-    if(polarityOfResult>0){
-        resultElement.classList="";
-        resultElement.classList.add("positive")
-    } else if(polarityOfResult<0){
-        resultElement.classList="";
-        resultElement.classList.add("negative");
-    } else {
-        resultElement.classList="";
-        resultElement.classList.add("neutral")
-    }
-    hideLoading();
-    resultElement.innerText = "It is result of the analys.\nThe text you wrote has:\nPolarity = "+polarityOfResult+"\nThe type of text is "+typeOfResult+"."
+    const result = await response.json() 
+    const polarityOfResult = JSON.stringify(result.result.polarity);
+    const typeOfResult = JSON.stringify(result.result.type)
+    resultElement.classList.add(typeOfResult.slice(1,(typeOfResult.length-1))); //adding specific status to the result class; using slice to avoid double quotes in ste status name
+
+    hideLoading(); //finish to display loading element
+
+    resultElement.innerText = "It is result of the analys.\nThe text you wrote has:\nPolarity = "+polarityOfResult+"\nThe type of text is "+typeOfResult+".";//displaying result of the request
     addCatAnimation(response.status)
 }
 
+document.getElementById("check-button").addEventListener("click", checkText)
