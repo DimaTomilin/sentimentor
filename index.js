@@ -31,7 +31,7 @@ async function checkText(){
             'Accept': "application/json" ,
             'Content-Type': "application/json",
         },
-        body: JSON.stringify({'text': document.querySelector("input").value})
+        body: JSON.stringify({'text': document.querySelector("textarea").value})
     })
 
     if(!response.ok){ // error part: behavior of all elements in error situation anf throw ERROR with current status
